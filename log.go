@@ -3,6 +3,8 @@ package log
 import (
 	"log"
 	"os"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var logger *log.Logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
@@ -12,7 +14,13 @@ var debug = false
 
 func SetProcess(p string) {
 
-	//logger = log.New(os.Stdout, p+"\t", log.Ldate|log.Ltime)
+	log.SetOutput(&lumberjack.Logger{
+		Filename:   "/var/log/axihome/" + p + ".log",
+		MaxSize:    5, // megabytes
+		MaxBackups: 10,
+		MaxAge:     28, //days
+	})
+
 	pro = p
 	if pro != "" {
 
@@ -30,6 +38,8 @@ func SetDebug(b bool) {
 
 func Println(a ...interface{}) {
 
+	log.Println(a...)
+
 	if process {
 		logger.Printf("[%s] : %v", pro, a[0])
 	} else {
@@ -42,6 +52,9 @@ func Println(a ...interface{}) {
 func Debug(a ...interface{}) {
 
 	if debug {
+
+		log.Println(a...)
+
 		if process {
 			logger.Printf("[%s] : %v", pro, a[0])
 		} else {
